@@ -1,0 +1,39 @@
+body {
+    background-color: cornsilk
+}
+
+/* by h2 */
+h2[id="red"] {
+color: red;
+}
+/* или так через id */
+#red {
+color: red;
+}
+
+/* by h2 */
+h2[id="blue"] {
+color: blue;
+}
+/* by h2 */
+h2[id="orange"] {
+color: orange;
+}
+/* by h2 */
+h2[id="brown"] {
+color: brown;
+}
+/* by h2 */
+h2[id="darkblue"] {
+color: darkblue;
+}
+
+/* делаем курсив: */
+h1, h2, h3, h4, h5, h6 {
+font-style: italic;
+}
+
+img {
+height: 50px;
+width: 150px;
+}
