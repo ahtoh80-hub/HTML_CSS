@@ -1,0 +1,25 @@
+body {
+    background-color: cornsilk
+}
+h1, h2, h3, h4, h5, h6 {
+        color: blue;
+}
+
+/* by class */
+.item {
+font-size: 30px;
+}
+
+/* by id */
+#demo-selector {
+color: red;
+}
+/* by li */
+li[value="7"] {
+color: darkblue;
+}
+
+/* by all */
+* {
+text-align: center;
+}
