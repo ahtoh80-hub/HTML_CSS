@@ -1,0 +1,28 @@
+body {
+                background-color: #000;
+                margin: 0px;
+    }
+    .meme-container {
+                margin: 30px;
+                padding: 20px;
+                background-color: #555;
+                color: #fff;
+                text-align: center;
+                font-family: monospace;
+                font-size: 20px;
+                border-style: solid;
+                border-width: 10px 10px 10px 10px;
+                border-color: #fff;
+    }
+    img {
+                border-style: solid;        
+                border-width: 3px;
+                border-color: white;
+                text-align: center;
+    }
+    .txt {
+                color: #fff;
+                text-align: center;
+                font-family: monospace;
+                font-size: 20px;
+    }
