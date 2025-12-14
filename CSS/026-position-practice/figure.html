@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>"Прямоугольник и круг"</title>
+
+    <style>
+        body {
+                background-color: #989797fa;
+            }
+
+        h1 {
+            font-family: "Marck Script", cursive;
+            font-weight: 400;
+            font-style: normal;
+            text-align: center;
+        }
+        .rectangle {
+            width: 200px;
+            height: 100px;
+            background-color: blue;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+                }
+        .circle {
+            width: 80px;
+            height: 80px;
+            background-color: aqua;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+
+        }
+    </style>
+</head>
+
+<body>
+<h1>"Прямоугольник и круг"</h1> 
+
+    <div class="circle"></div>
+    <div class="rectangle"></div>
+</body>
+
+</html>
