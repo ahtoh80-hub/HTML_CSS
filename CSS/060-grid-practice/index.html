@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Layout</title>
+    <style>
+        body {
+            display: grid;
+            grid-template-rows: 100px 1fr 100px;
+            grid-template-columns: 100px 1fr;
+            row-gap: 1px;
+            column-gap: 1px;
+            background-color: #ccc;
+            border: 1px solid #000;
+            min-height: 100vh;
+        }
+
+        .header,
+        .footer {
+            grid-column: span 2;
+            background-color: #857d7d;
+            border: 1px solid #000;
+            min-height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+        }
+
+        .aside {
+        padding: 10px;
+        background-color: #d28484;
+        color: #ffffff;
+        font-size: 20px;
+        border: 1px solid #000;
+        
+        }
+
+        .main {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            background-color: #522121;
+            border: 1px solid #9c8f8f;
+            grid-gap: 20px
+        }
+
+            .section {
+            padding: 10px;
+            display: flex;
+            background-color: #579a61;
+            border: 1px solid #fcfc08;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+
+    </style>
+</head>
+
+
+<body>
+    <div class="header">Header</div>
+    <div class="aside">Side Panel</div>
+    <div class="main">
+        <div class="section">Content Section 1</div>
+        <div class="section">Content Section 2</div>
+        <div class="section">Content Section 3</div>
+    </div>
+    <div class="footer">Footer</div>
+</body>
+
+</html>
