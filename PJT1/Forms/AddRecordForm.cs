@@ -6,33 +6,12 @@ namespace PJT1.Forms
 {
     /// <summary>
     /// ФОРМА ДЛЯ ДОБАВЛЕНИЯ ЗАПИСИ
-    /// 
-    /// Диалоговое окно для ввода данных новой записи
     /// </summary>
     public class AddRecordForm : Form
     {
-        // ============================================================
-        // СВОЙСТВА ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ ИЗ ФОРМЫ
-        // ============================================================
-
-        /// <summary>
-        /// Имя тега, введенное пользователем
-        /// </summary>
         public string Tagname { get; private set; }
-
-        /// <summary>
-        /// Цикл, введенный пользователем
-        /// </summary>
         public string Loop { get; private set; }
-
-        /// <summary>
-        /// Комментарий, введенный пользователем
-        /// </summary>
         public string Comment { get; private set; }
-
-        // ============================================================
-        // ЭЛЕМЕНТЫ УПРАВЛЕНИЯ
-        // ============================================================
 
         private Label lblTagname;
         private Label lblLoop;
@@ -43,13 +22,8 @@ namespace PJT1.Forms
         private Button btnOK;
         private Button btnCancel;
 
-        // ============================================================
-        // КОНСТРУКТОР
-        // ============================================================
-
         public AddRecordForm()
         {
-            // Настройка формы
             this.Text = "Добавление записи";
             this.Size = new Size(500, 300);
             this.StartPosition = FormStartPosition.CenterParent;
@@ -58,10 +32,8 @@ namespace PJT1.Forms
             this.MinimizeBox = false;
             this.BackColor = Color.White;
 
-            // Создаем элементы управления
             InitializeControls();
 
-            // Добавляем элементы на форму
             this.Controls.Add(lblTagname);
             this.Controls.Add(lblLoop);
             this.Controls.Add(lblComment);
@@ -72,15 +44,9 @@ namespace PJT1.Forms
             this.Controls.Add(btnCancel);
         }
 
-        /// <summary>
-        /// СОЗДАНИЕ ЭЛЕМЕНТОВ УПРАВЛЕНИЯ
-        /// </summary>
         private void InitializeControls()
         {
-            // ============================================================
-            // МЕТКА "ИМЯ ТЕГА"
-            // ============================================================
-
+            // Метка "Имя тега"
             lblTagname = new Label();
             lblTagname.Text = "Имя тега:*";
             lblTagname.Location = new Point(20, 20);
@@ -88,20 +54,14 @@ namespace PJT1.Forms
             lblTagname.Font = new Font("Arial", 10, FontStyle.Bold);
             lblTagname.ForeColor = Color.FromArgb(0, 123, 255);
 
-            // ============================================================
-            // ТЕКСТОВОЕ ПОЛЕ "ИМЯ ТЕГА"
-            // ============================================================
-
+            // Поле "Имя тега"
             txtTagname = new TextBox();
             txtTagname.Location = new Point(130, 20);
             txtTagname.Size = new Size(320, 25);
             txtTagname.Font = new Font("Arial", 10);
             txtTagname.BackColor = Color.FromArgb(248, 248, 248);
 
-            // ============================================================
-            // МЕТКА "ЦИКЛ"
-            // ============================================================
-
+            // Метка "Цикл"
             lblLoop = new Label();
             lblLoop.Text = "Цикл:*";
             lblLoop.Location = new Point(20, 60);
@@ -109,30 +69,21 @@ namespace PJT1.Forms
             lblLoop.Font = new Font("Arial", 10, FontStyle.Bold);
             lblLoop.ForeColor = Color.FromArgb(0, 123, 255);
 
-            // ============================================================
-            // ТЕКСТОВОЕ ПОЛЕ "ЦИКЛ"
-            // ============================================================
-
+            // Поле "Цикл"
             txtLoop = new TextBox();
             txtLoop.Location = new Point(130, 60);
             txtLoop.Size = new Size(320, 25);
             txtLoop.Font = new Font("Arial", 10);
             txtLoop.BackColor = Color.FromArgb(248, 248, 248);
 
-            // ============================================================
-            // МЕТКА "КОММЕНТАРИЙ"
-            // ============================================================
-
+            // Метка "Комментарий"
             lblComment = new Label();
             lblComment.Text = "Комментарий:";
             lblComment.Location = new Point(20, 100);
             lblComment.Size = new Size(100, 25);
             lblComment.Font = new Font("Arial", 10, FontStyle.Bold);
 
-            // ============================================================
-            // ТЕКСТОВОЕ ПОЛЕ "КОММЕНТАРИЙ"
-            // ============================================================
-
+            // Поле "Комментарий"
             txtComment = new TextBox();
             txtComment.Location = new Point(130, 100);
             txtComment.Size = new Size(320, 60);
@@ -141,10 +92,7 @@ namespace PJT1.Forms
             txtComment.Multiline = true;
             txtComment.ScrollBars = ScrollBars.Vertical;
 
-            // ============================================================
-            // КНОПКА "OK"
-            // ============================================================
-
+            // Кнопка "OK"
             btnOK = new Button();
             btnOK.Text = "Добавить";
             btnOK.Location = new Point(270, 190);
@@ -157,10 +105,7 @@ namespace PJT1.Forms
             btnOK.DialogResult = DialogResult.OK;
             btnOK.Click += BtnOK_Click;
 
-            // ============================================================
-            // КНОПКА "ОТМЕНА"
-            // ============================================================
-
+            // Кнопка "Отмена"
             btnCancel = new Button();
             btnCancel.Text = "Отмена";
             btnCancel.Location = new Point(380, 190);
@@ -172,31 +117,19 @@ namespace PJT1.Forms
             btnCancel.Cursor = Cursors.Hand;
             btnCancel.DialogResult = DialogResult.Cancel;
 
-            // Подсказки
-            lblTagname.Text = "Имя тега:*";
-            lblLoop.Text = "Цикл:*";
-            
             // Валидация
             txtTagname.TextChanged += (s, e) => ValidateFields();
             txtLoop.TextChanged += (s, e) => ValidateFields();
         }
 
-        /// <summary>
-        /// ПРОВЕРКА ЗАПОЛНЕНИЯ ОБЯЗАТЕЛЬНЫХ ПОЛЕЙ
-        /// </summary>
         private void ValidateFields()
         {
-            // Кнопка OK активна только если заполнены обязательные поля
             btnOK.Enabled = !string.IsNullOrWhiteSpace(txtTagname.Text) &&
                            !string.IsNullOrWhiteSpace(txtLoop.Text);
         }
 
-        /// <summary>
-        /// ОБРАБОТЧИК НАЖАТИЯ КНОПКИ "OK"
-        /// </summary>
         private void BtnOK_Click(object sender, EventArgs e)
         {
-            // Проверяем, что обязательные поля заполнены
             if (string.IsNullOrWhiteSpace(txtTagname.Text))
             {
                 MessageBox.Show(
@@ -221,7 +154,6 @@ namespace PJT1.Forms
                 return;
             }
 
-            // Сохраняем введенные данные
             Tagname = txtTagname.Text.Trim();
             Loop = txtLoop.Text.Trim();
             Comment = txtComment.Text.Trim();
