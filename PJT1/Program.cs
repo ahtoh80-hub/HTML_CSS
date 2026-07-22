@@ -1,16 +1,32 @@
-namespace PJT1;
+using System;
+using System.Windows.Forms;
+using PJT1.Forms;
 
-static class Program
+namespace PJT1
 {
     /// <summary>
-    ///  The main entry point for the application.
+    /// ГЛАВНЫЙ КЛАСС ПРОГРАММЫ
+    /// 
+    /// Точка входа в приложение
     /// </summary>
-    [STAThread]
-    static void Main()
+    internal static class Program
     {
-        // To customize application configuration such as set high DPI settings or default font,
-        // see https://aka.ms/applicationconfiguration.
-        ApplicationConfiguration.Initialize();
-        Application.Run(new Form1());
-    }    
+        /// <summary>
+        /// ТОЧКА ВХОДА
+        /// 
+        /// Запускает главную форму приложения
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            // Включаем визуальные стили Windows
+            Application.EnableVisualStyles();
+            
+            // Устанавливаем режим совместимости текста
+            Application.SetCompatibleTextRenderingDefault(false);
+            
+            // Запускаем главную форму
+            Application.Run(new FormDB());
+        }
+    }
 }
