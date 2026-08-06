@@ -1,6 +1,0 @@
-C:\Users\RAN-Notebook\Desktop\PJT\PJT1\obj\Debug\net8.0\PJT1.csproj.AssemblyReference.cache
-C:\Users\RAN-Notebook\Desktop\PJT\PJT1\obj\Debug\net8.0\PJT1.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\RAN-Notebook\Desktop\PJT\PJT1\obj\Debug\net8.0\PJT1.AssemblyInfoInputs.cache
-C:\Users\RAN-Notebook\Desktop\PJT\PJT1\obj\Debug\net8.0\PJT1.AssemblyInfo.cs
-C:\Users\RAN-Notebook\Desktop\PJT\PJT1\obj\Debug\net8.0\PJT1.csproj.CoreCompileInputs.cache
-C:\Users\RAN-Notebook\Desktop\PJT\PJT1\obj\Debug\net8.0\PJT1.sourcelink.json
