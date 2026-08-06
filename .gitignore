@@ -1,0 +1,19 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# User-specific and IDE files
+*.csproj.user
+*.suo
+*.user
+.vs/
+
+# Access database lock files
+*.laccdb
+*.ldb
+
+# Secrets / local config
+.env
+.env.*
+*.pfx
+appsettings.Development.json

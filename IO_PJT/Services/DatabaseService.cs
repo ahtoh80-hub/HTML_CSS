@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.OleDb;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using IO_PJT.Models;
 
 namespace IO_PJT.Services
@@ -18,10 +19,39 @@ namespace IO_PJT.Services
             string provider = dbPath.EndsWith(".accdb", StringComparison.OrdinalIgnoreCase)
                 ? "Microsoft.ACE.OLEDB.12.0"
                 : "Microsoft.Jet.OLEDB.4.0";
-            _connectionString = $"Provider={provider};Data Source={_dbPath};";
+            var builder = new OleDbConnectionStringBuilder
+            {
+                Provider = provider,
+                DataSource = _dbPath
+            };
+            _connectionString = builder.ConnectionString;
         }
 
         public bool DatabaseExists() => File.Exists(_dbPath);
+
+        private static readonly Regex IdentifierPattern =
+            new Regex(@"^[A-Za-z_][A-Za-z0-9_ ]{0,63}$", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Проверяет имя таблицы или поля перед подстановкой в SQL-запрос.
+        /// Имена нельзя передать параметром, поэтому допускается только
+        /// ограниченный набор символов.
+        /// </summary>
+        private static string ValidateIdentifier(string identifier, string paramName)
+        {
+            if (string.IsNullOrWhiteSpace(identifier))
+                throw new ArgumentException("Имя не может быть пустым.", paramName);
+
+            identifier = identifier.Trim();
+
+            if (!IdentifierPattern.IsMatch(identifier))
+                throw new ArgumentException(
+                    $"Недопустимое имя '{identifier}'. Разрешены латинские буквы, цифры, " +
+                    "пробел и подчеркивание; имя должно начинаться с буквы или подчеркивания.",
+                    paramName);
+
+            return identifier;
+        }
 
         public void CreateEmptyDatabase()
         {
@@ -91,6 +121,8 @@ namespace IO_PJT.Services
 
         public bool TableExists(string tableName)
         {
+            tableName = ValidateIdentifier(tableName, nameof(tableName));
+
             using (var connection = new OleDbConnection(_connectionString))
             {
                 connection.Open();
@@ -102,6 +134,8 @@ namespace IO_PJT.Services
 
         public void DropTable(string tableName)
         {
+            tableName = ValidateIdentifier(tableName, nameof(tableName));
+
             using (var connection = new OleDbConnection(_connectionString))
             {
                 connection.Open();
@@ -114,13 +148,16 @@ namespace IO_PJT.Services
 
         public void CreateTable(string tableName)
         {
+            tableName = ValidateIdentifier(tableName, nameof(tableName));
+
             var fields = TableStructure.GetFields();
             var sb = new StringBuilder();
             sb.Append($"CREATE TABLE [{tableName}] (");
 
             for (int i = 0; i < fields.Count; i++)
             {
-                sb.Append($"[{fields[i].Name}] {fields[i].Type}");
+                string fieldName = ValidateIdentifier(fields[i].Name, "fieldName");
+                sb.Append($"[{fieldName}] {fields[i].Type}");
                 if (i < fields.Count - 1)
                     sb.Append(", ");
             }
@@ -182,6 +219,8 @@ namespace IO_PJT.Services
 
         public void InsertSampleData(string tableName)
         {
+            tableName = ValidateIdentifier(tableName, nameof(tableName));
+
             string insertSql = $@"
                 INSERT INTO [{tableName}] (
                     Code, Area, Tag, TagPc, Service, ServiceEng, 
