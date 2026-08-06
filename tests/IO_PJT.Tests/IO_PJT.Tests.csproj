@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>IO_PJT.Tests</RootNamespace>
+    <!-- OleDb is Windows-only; the tests never open a connection on other platforms. -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    IO_PJT is a WinExe/WinForms project (net8.0-windows), so it cannot be referenced from a
+    cross-platform test project. The UI-independent sources are compiled directly instead.
+  -->
+  <ItemGroup>
+    <Compile Include="../../IO_PJT/Models/IoPointModels.cs" Link="Sources/Models/IoPointModels.cs" />
+    <Compile Include="../../IO_PJT/Services/DatabaseService.cs" Link="Sources/Services/DatabaseService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.OleDb" Version="8.0.0" />
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

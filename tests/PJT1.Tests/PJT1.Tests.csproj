@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>PJT1.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    PJT1 is a WinExe/WinForms project (net8.0-windows), so it cannot be referenced from a
+    cross-platform test project. The UI-independent sources are compiled directly instead.
+  -->
+  <ItemGroup>
+    <Compile Include="../../PJT1/Models/DataBD.cs" Link="Sources/Models/DataBD.cs" />
+    <Compile Include="../../PJT1/Repositories/IDataBDRepository.cs" Link="Sources/Repositories/IDataBDRepository.cs" />
+    <Compile Include="../../PJT1/Repositories/DataBDRepository.cs" Link="Sources/Repositories/DataBDRepository.cs" />
+    <Compile Include="../../PJT1/Services/ExcelService.cs" Link="Sources/Services/ExcelService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="7.1.0" />
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>
