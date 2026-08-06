@@ -23,6 +23,41 @@ namespace IO_PJT.Services
 
         public bool DatabaseExists() => File.Exists(_dbPath);
 
+        /// <summary>
+        /// Открывает соединение с базой и передает его в переданное действие
+        /// </summary>
+        private T WithConnection<T>(Func<OleDbConnection, T> action)
+        {
+            using (var connection = new OleDbConnection(_connectionString))
+            {
+                connection.Open();
+                return action(connection);
+            }
+        }
+
+        private void WithConnection(Action<OleDbConnection> action)
+        {
+            WithConnection<object?>(connection =>
+            {
+                action(connection);
+                return null;
+            });
+        }
+
+        /// <summary>
+        /// Выполняет SQL-команду, не возвращающую данные
+        /// </summary>
+        private static void ExecuteNonQuery(OleDbConnection connection, string sql)
+        {
+            using (var cmd = new OleDbCommand(sql, connection))
+            {
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private void ExecuteNonQuery(string sql) =>
+            WithConnection(connection => ExecuteNonQuery(connection, sql));
+
         public void CreateEmptyDatabase()
         {
             if (DatabaseExists()) return;
@@ -69,47 +104,26 @@ namespace IO_PJT.Services
         private void CreateDatabaseViaOleDb()
         {
             // Для создания пустой базы через OleDb нужно создать хотя бы одну таблицу
-            using (var connection = new OleDbConnection(_connectionString))
+            WithConnection(connection =>
             {
-                connection.Open();
-                
-                // Создаем временную таблицу
-                using (var cmd = new OleDbCommand("CREATE TABLE _temp (ID COUNTER PRIMARY KEY)", connection))
-                {
-                    cmd.ExecuteNonQuery();
-                }
-                
-                // Удаляем временную таблицу
-                using (var cmd = new OleDbCommand("DROP TABLE _temp", connection))
-                {
-                    cmd.ExecuteNonQuery();
-                }
-                
-                connection.Close();
-            }
+                ExecuteNonQuery(connection, "CREATE TABLE _temp (ID COUNTER PRIMARY KEY)");
+                ExecuteNonQuery(connection, "DROP TABLE _temp");
+            });
         }
 
         public bool TableExists(string tableName)
         {
-            using (var connection = new OleDbConnection(_connectionString))
+            return WithConnection(connection =>
             {
-                connection.Open();
                 string[] restrictions = new string[4] { null, null, tableName, null };
                 var tables = connection.GetSchema("Tables", restrictions);
                 return tables.Rows.Count > 0;
-            }
+            });
         }
 
         public void DropTable(string tableName)
         {
-            using (var connection = new OleDbConnection(_connectionString))
-            {
-                connection.Open();
-                using (var cmd = new OleDbCommand($"DROP TABLE [{tableName}]", connection))
-                {
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            ExecuteNonQuery($"DROP TABLE [{tableName}]");
         }
 
         public void CreateTable(string tableName)
@@ -128,27 +142,17 @@ namespace IO_PJT.Services
 
             string createSql = sb.ToString();
 
-            using (var connection = new OleDbConnection(_connectionString))
+            WithConnection(connection =>
             {
-                connection.Open();
-                using (var cmd = new OleDbCommand(createSql, connection))
-                {
-                    cmd.ExecuteNonQuery();
-                }
+                ExecuteNonQuery(connection, createSql);
 
                 // Создаем индекс для быстрого поиска по Tag
                 try
                 {
-                    string createIndexSql = $"CREATE INDEX idx_Tag ON [{tableName}] (Tag)";
-                    using (var cmd = new OleDbCommand(createIndexSql, connection))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
+                    ExecuteNonQuery(connection, $"CREATE INDEX idx_Tag ON [{tableName}] (Tag)");
                 }
                 catch { /* Индекс может не создаться, если поле Tag отсутствует */ }
-
-                connection.Close();
-            }
+            });
         }
 
         public void CreateTableIfNotExists(string tableName)
@@ -162,9 +166,8 @@ namespace IO_PJT.Services
         public List<string> GetTableNames()
         {
             var tables = new List<string>();
-            using (var connection = new OleDbConnection(_connectionString))
+            WithConnection(connection =>
             {
-                connection.Open();
                 var schema = connection.GetSchema("Tables", new[] { null, null, null, "TABLE" });
                 foreach (System.Data.DataRow row in schema.Rows)
                 {
@@ -175,8 +178,7 @@ namespace IO_PJT.Services
                         tables.Add(tableName);
                     }
                 }
-                connection.Close();
-            }
+            });
             return tables;
         }
 
@@ -196,52 +198,38 @@ namespace IO_PJT.Services
                     '2000-S-SC-B01', '2490156-1401-PR007-0101A'
                 )";
 
-            using (var connection = new OleDbConnection(_connectionString))
+            ExecuteNonQuery(insertSql);
+        }
+
+        /// <summary>
+        /// Проверяет, доступен ли указанный OLE DB провайдер
+        /// </summary>
+        private static bool IsProviderAvailable(string provider)
+        {
+            try
             {
-                connection.Open();
-                using (var cmd = new OleDbCommand(insertSql, connection))
+                using (var connection = new OleDbConnection($"Provider={provider};Data Source=:memory:"))
                 {
-                    cmd.ExecuteNonQuery();
+                    connection.Open();
+                    return true;
                 }
+            }
+            catch
+            {
+                return false;
             }
         }
 
         /// <summary>
         /// Проверяет, доступен ли провайдер ACE для работы с .accdb
         /// </summary>
-        public static bool IsAceProviderAvailable()
-        {
-            try
-            {
-                using (var connection = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=:memory:"))
-                {
-                    connection.Open();
-                    return true;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        public static bool IsAceProviderAvailable() =>
+            IsProviderAvailable("Microsoft.ACE.OLEDB.12.0");
 
         /// <summary>
         /// Проверяет, доступен ли провайдер Jet для работы с .mdb
         /// </summary>
-        public static bool IsJetProviderAvailable()
-        {
-            try
-            {
-                using (var connection = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=:memory:"))
-                {
-                    connection.Open();
-                    return true;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        public static bool IsJetProviderAvailable() =>
+            IsProviderAvailable("Microsoft.Jet.OLEDB.4.0");
     }
 }

@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using PJT1.Models;
+using WinFormsKit;
 
 namespace PJT1.Services
 {
@@ -83,13 +84,11 @@ namespace PJT1.Services
                 File.WriteAllText(filePath, content, Encoding.UTF8);
 
                 // Показываем сообщение об успехе
-                MessageBox.Show(
+                UserMessages.Info(
                     $"✅ Данные успешно сохранены в файл:\n{filePath}\n" +
                     $"📊 Количество записей: {GetCount(dataList)}\n" +
                     $"📦 Размер файла: {new FileInfo(filePath).Length / 1024} КБ",
-                    "Экспорт завершен",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
+                    "Экспорт завершен"
                 );
             }
             catch (Exception ex)
@@ -142,12 +141,7 @@ namespace PJT1.Services
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Ошибка при экспорте данных:\n{ex.Message}",
-                    "Ошибка",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
+                UserMessages.Error($"Ошибка при экспорте данных:\n{ex.Message}");
             }
 
             return false;
@@ -184,10 +178,7 @@ namespace PJT1.Services
             }
 
             if (includeHeader)
-            {
-                sb.AppendLine(new string('-', 80));
-                sb.AppendLine($"Всего записей: {GetCount(dataList)}");
-            }
+                AppendTotalFooter(sb, new string('-', 80), dataList);
 
             return sb.ToString();
         }
@@ -239,10 +230,7 @@ namespace PJT1.Services
             }
 
             if (includeHeader)
-            {
-                sb.AppendLine(new string('-', header.Length));
-                sb.AppendLine($"Всего записей: {GetCount(dataList)}");
-            }
+                AppendTotalFooter(sb, new string('-', header.Length), dataList);
 
             return sb.ToString();
         }
@@ -277,10 +265,7 @@ namespace PJT1.Services
             }
 
             if (includeHeader)
-            {
-                sb.AppendLine($"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                sb.AppendLine($"Всего записей: {GetCount(dataList)}");
-            }
+                AppendTotalFooter(sb, new string('━', 67), dataList);
 
             return sb.ToString();
         }
@@ -367,6 +352,18 @@ namespace PJT1.Services
         // ============================================================
         // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
         // ============================================================
+
+        /// <summary>
+        /// ЗАВЕРШАЮЩИЙ БЛОК С ИТОГОВЫМ КОЛИЧЕСТВОМ ЗАПИСЕЙ
+        /// </summary>
+        private static void AppendTotalFooter(
+            StringBuilder sb,
+            string separatorLine,
+            IEnumerable<DataBD> dataList)
+        {
+            sb.AppendLine(separatorLine);
+            sb.AppendLine($"Всего записей: {GetCount(dataList)}");
+        }
 
         /// <summary>
         /// ПОЛУЧИТЬ КОЛИЧЕСТВО ЗАПИСЕЙ

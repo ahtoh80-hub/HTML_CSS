@@ -14,4 +14,8 @@
     <PackageReference Include="System.Data.OleDb" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\WinFormsKit\WinFormsKit.csproj" />
+  </ItemGroup>
+
 </Project>
