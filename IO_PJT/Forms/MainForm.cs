@@ -1,6 +1,8 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using IO_PJT.Services;
 using IO_PJT.Utils;
@@ -210,9 +212,11 @@ namespace IO_PJT
                         File.Delete(dbPath);
                         GetLogger().Info($"Удалена существующая БД: {dbPath}");
                     }
-                    catch
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                     {
-                        MessageBox.Show("Не удалось удалить существующую БД. Возможно, она открыта в другой программе.", 
+                        GetLogger().Error($"Не удалось удалить БД: {ex.Message}");
+                        MessageBox.Show(
+                            "Не удалось удалить существующую БД. Возможно, она открыта в другой программе.\n\n" + ex.Message,
                             "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
@@ -227,9 +231,10 @@ namespace IO_PJT
             }
             catch (Exception ex)
             {
-                GetLogger().Error($"Ошибка создания БД: {ex.Message}");
+                string details = DescribeError(ex);
+                GetLogger().Error($"Ошибка создания БД: {details}");
                 UpdateStatus($"❌ Ошибка: {ex.Message}");
-                MessageBox.Show($"Ошибка создания БД:\n{ex.Message}", "Ошибка", 
+                MessageBox.Show($"Ошибка создания БД:\n{details}", "Ошибка", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -269,8 +274,8 @@ namespace IO_PJT
                 logger.Info($"Создание таблицы '{tableName}'...");
                 UpdateStatus($"⏳ Создание таблицы '{tableName}'...");
 
-                // Создаем таблицу
-                dbService.CreateTableIfNotExists(tableName);
+                // Создаем таблицу (некритичные проблемы попадают в лог)
+                dbService.CreateTableIfNotExists(tableName, logger.Warning);
 
                 logger.Success($"Таблица '{tableName}' успешно создана!");
                 UpdateStatus($"✅ Таблица '{tableName}' создана");
@@ -287,9 +292,10 @@ namespace IO_PJT
             }
             catch (Exception ex)
             {
-                GetLogger().Error($"Ошибка создания таблицы: {ex.Message}");
+                string details = DescribeError(ex);
+                GetLogger().Error($"Ошибка создания таблицы: {details}");
                 UpdateStatus($"❌ Ошибка: {ex.Message}");
-                MessageBox.Show($"Ошибка создания таблицы:\n{ex.Message}", 
+                MessageBox.Show($"Ошибка создания таблицы:\n{details}", 
                     "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -343,10 +349,31 @@ namespace IO_PJT
             }
             catch (Exception ex)
             {
-                GetLogger().Error($"Ошибка добавления данных: {ex.Message}");
-                MessageBox.Show($"Ошибка добавления данных:\n{ex.Message}", 
+                string details = DescribeError(ex);
+                GetLogger().Error($"Ошибка добавления данных: {details}");
+                UpdateStatus($"❌ Ошибка: {ex.Message}");
+                MessageBox.Show($"Ошибка добавления данных:\n{details}", 
                     "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        /// <summary>
+        /// Разворачивает цепочку InnerException, чтобы не терять первопричину сбоя
+        /// </summary>
+        private static string DescribeError(Exception ex)
+        {
+            if (ex is AggregateException aggregate)
+            {
+                return string.Join("\n→ ", aggregate.Message,
+                    string.Join("\n→ ", aggregate.InnerExceptions.Select(DescribeError)));
+            }
+
+            var sb = new StringBuilder(ex.Message);
+            for (var inner = ex.InnerException; inner != null; inner = inner.InnerException)
+            {
+                sb.Append("\n→ ").Append(inner.Message);
+            }
+            return sb.ToString();
         }
 
         private Logger GetLogger()

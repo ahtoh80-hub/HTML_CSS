@@ -48,7 +48,7 @@ namespace PJT1.Repositories
         /// </summary>
         /// <param name="id">Уникальный идентификатор</param>
         /// <returns>Объект DataBD или null</returns>
-        DataBD GetById(int id);
+        DataBD? GetById(int id);
 
         /// <summary>
         /// ДОБАВИТЬ ЗАПИСЬ

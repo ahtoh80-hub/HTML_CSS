@@ -44,6 +44,8 @@ static led_strip_handle_t led_strip;
  */
 static void blink_led(void)
 {
+    esp_err_t err;
+
     /* Если состояние 0, 1 или 2 - светодиод горит */
     if (s_led_state < 3)
     {
@@ -51,22 +53,37 @@ static void blink_led(void)
         switch (s_led_state)
         {
         case 0: // Красный цвет
-            led_strip_set_pixel(led_strip, 0, 255, 0, 0);
+            err = led_strip_set_pixel(led_strip, 0, 255, 0, 0);
             break;
         case 1: // Зеленый цвет
-            led_strip_set_pixel(led_strip, 0, 0, 255, 0);
+            err = led_strip_set_pixel(led_strip, 0, 0, 255, 0);
             break;
-        case 2: // Синий цвет
-            led_strip_set_pixel(led_strip, 0, 0, 0, 255);
+        default: // Синий цвет
+            err = led_strip_set_pixel(led_strip, 0, 0, 0, 255);
             break;
         }
+
+        if (err != ESP_OK)
+        {
+            ESP_LOGE(TAG, "led_strip_set_pixel: %s", esp_err_to_name(err));
+            return;
+        }
+
         /* Отправляем данные на светодиод - он загорается */
-        led_strip_refresh(led_strip);
+        err = led_strip_refresh(led_strip);
+        if (err != ESP_OK)
+        {
+            ESP_LOGE(TAG, "led_strip_refresh: %s", esp_err_to_name(err));
+        }
     }
     else
     {
         /* Выключаем светодиод - очищаем все пиксели */
-        led_strip_clear(led_strip);
+        err = led_strip_clear(led_strip);
+        if (err != ESP_OK)
+        {
+            ESP_LOGE(TAG, "led_strip_clear: %s", esp_err_to_name(err));
+        }
     }
 }
 
@@ -111,7 +128,7 @@ static void configure_led(void)
 #endif
 
     /* Изначально выключаем все светодиоды */
-    led_strip_clear(led_strip);
+    ESP_ERROR_CHECK(led_strip_clear(led_strip));
 }
 
 // ============================================================================
@@ -127,7 +144,11 @@ static void configure_led(void)
 static void blink_led(void)
 {
     /* Устанавливаем уровень на пине в зависимости от состояния */
-    gpio_set_level(BLINK_GPIO, s_led_state);
+    esp_err_t err = gpio_set_level(BLINK_GPIO, s_led_state);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "gpio_set_level: %s", esp_err_to_name(err));
+    }
 }
 
 /**
@@ -138,8 +159,8 @@ static void blink_led(void)
 static void configure_led(void)
 {
     ESP_LOGI(TAG, "Пример настроен на мигание GPIO-светодиодом!");
-    gpio_reset_pin(BLINK_GPIO);                       // Сбрасываем пин в состояние по умолчанию
-    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT); // Настраиваем как выход
+    gpio_reset_pin(BLINK_GPIO);                                       // Сбрасываем пин в состояние по умолчанию
+    ESP_ERROR_CHECK(gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT)); // Настраиваем как выход
 }
 
 // ============================================================================

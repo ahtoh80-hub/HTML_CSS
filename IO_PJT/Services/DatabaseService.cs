@@ -32,10 +32,21 @@ namespace IO_PJT.Services
                 // Создаем пустую базу данных через ADOX (если доступен)
                 CreateDatabaseViaAdox();
             }
-            catch
+            catch (Exception adoxEx)
             {
-                // Если ADOX не доступен, создаем через OleDb
-                CreateDatabaseViaOleDb();
+                // Если ADOX не доступен, создаем через OleDb.
+                // Если и это не сработало - сообщаем обе причины, а не только последнюю
+                try
+                {
+                    CreateDatabaseViaOleDb();
+                }
+                catch (Exception oleDbEx)
+                {
+                    throw new AggregateException(
+                        $"Не удалось создать базу данных '{_dbPath}' ни через ADOX, ни через OleDb",
+                        adoxEx,
+                        oleDbEx);
+                }
             }
         }
 
@@ -44,22 +55,29 @@ namespace IO_PJT.Services
         /// </summary>
         private void CreateDatabaseViaAdox()
         {
+            // Используем динамическое создание ADOX для совместимости
+            Type? catalogType = Type.GetTypeFromProgID("ADOX.Catalog");
+            if (catalogType == null)
+            {
+                throw new PlatformNotSupportedException(
+                    "ADOX (ADOX.Catalog) не зарегистрирован в системе");
+            }
+
             try
             {
-                // Используем динамическое создание ADOX для совместимости
-                Type catalogType = Type.GetTypeFromProgID("ADOX.Catalog");
-                if (catalogType != null)
+                dynamic? catalog = Activator.CreateInstance(catalogType);
+                if (catalog == null)
                 {
-                    dynamic catalog = Activator.CreateInstance(catalogType);
-                    catalog.Create(_connectionString);
-                    catalog = null;
-                    return;
+                    throw new InvalidOperationException("Не удалось создать экземпляр ADOX.Catalog");
                 }
-                throw new Exception("ADOX не доступен");
+                catalog.Create(_connectionString);
             }
-            catch
+            catch (Exception ex)
             {
-                throw new Exception("Не удалось создать базу данных через ADOX. Попробуйте установить Microsoft Access Database Engine.");
+                // Сохраняем исходную ошибку COM как InnerException
+                throw new InvalidOperationException(
+                    "Не удалось создать базу данных через ADOX. Попробуйте установить Microsoft Access Database Engine.",
+                    ex);
             }
         }
 
@@ -112,7 +130,15 @@ namespace IO_PJT.Services
             }
         }
 
-        public void CreateTable(string tableName)
+        /// <summary>
+        /// Создание таблицы
+        /// </summary>
+        /// <param name="tableName">Имя таблицы</param>
+        /// <param name="warn">
+        /// Вызывается для некритичных проблем (например, не создан индекс),
+        /// чтобы они не терялись молча
+        /// </param>
+        public void CreateTable(string tableName, Action<string>? warn = null)
         {
             var fields = TableStructure.GetFields();
             var sb = new StringBuilder();
@@ -145,18 +171,23 @@ namespace IO_PJT.Services
                         cmd.ExecuteNonQuery();
                     }
                 }
-                catch { /* Индекс может не создаться, если поле Tag отсутствует */ }
+                catch (Exception ex)
+                {
+                    // Индекс не критичен (например, поле Tag отсутствует),
+                    // но пользователь должен увидеть причину в логе
+                    warn?.Invoke($"Индекс idx_Tag не создан: {ex.Message}");
+                }
 
                 connection.Close();
             }
         }
 
-        public void CreateTableIfNotExists(string tableName)
+        public void CreateTableIfNotExists(string tableName, Action<string>? warn = null)
         {
             if (TableExists(tableName))
                 DropTable(tableName);
             
-            CreateTable(tableName);
+            CreateTable(tableName, warn);
         }
 
         public List<string> GetTableNames()
@@ -168,7 +199,10 @@ namespace IO_PJT.Services
                 var schema = connection.GetSchema("Tables", new[] { null, null, null, "TABLE" });
                 foreach (System.Data.DataRow row in schema.Rows)
                 {
-                    string tableName = row["TABLE_NAME"].ToString();
+                    string? tableName = row["TABLE_NAME"]?.ToString();
+                    if (string.IsNullOrEmpty(tableName))
+                        continue;
+
                     // Пропускаем системные таблицы
                     if (!tableName.StartsWith("~") && !tableName.StartsWith("MSys"))
                     {
@@ -210,35 +244,33 @@ namespace IO_PJT.Services
         /// Проверяет, доступен ли провайдер ACE для работы с .accdb
         /// </summary>
         public static bool IsAceProviderAvailable()
-        {
-            try
-            {
-                using (var connection = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=:memory:"))
-                {
-                    connection.Open();
-                    return true;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
+            => IsProviderAvailable("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=:memory:");
 
         /// <summary>
         /// Проверяет, доступен ли провайдер Jet для работы с .mdb
         /// </summary>
         public static bool IsJetProviderAvailable()
+            => IsProviderAvailable("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=:memory:");
+
+        /// <summary>
+        /// Пробное подключение к провайдеру.
+        /// Перехватываются только ошибки "провайдер недоступен";
+        /// остальные исключения пробрасываются вызывающему коду.
+        /// </summary>
+        private static bool IsProviderAvailable(string connectionString)
         {
             try
             {
-                using (var connection = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=:memory:"))
+                using (var connection = new OleDbConnection(connectionString))
                 {
                     connection.Open();
                     return true;
                 }
             }
-            catch
+            catch (Exception ex) when (ex is OleDbException
+                                       or InvalidOperationException
+                                       or System.Runtime.InteropServices.COMException
+                                       or PlatformNotSupportedException)
             {
                 return false;
             }

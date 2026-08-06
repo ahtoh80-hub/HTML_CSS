@@ -46,7 +46,7 @@ namespace PJT1.Services
         /// <returns>Список объектов DataBD</returns>
         /// <exception cref="FileNotFoundException">Файл не найден</exception>
         /// <exception cref="ArgumentException">Неподдерживаемое расширение</exception>
-        /// <exception cref="Exception">Ошибка чтения Excel</exception>
+        /// <exception cref="InvalidDataException">Файл пуст или поврежден</exception>
         public static List<DataBD> ReadFirstTwoFieldsFromExcel(string filePath)
         {
             // Создаем список для результатов
@@ -55,6 +55,12 @@ namespace PJT1.Services
             // ============================================================
             // ШАГ 1: ПРОВЕРКА ФАЙЛА
             // ============================================================
+
+            // Проверяем путь
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("Путь к файлу не может быть пустым", nameof(filePath));
+            }
 
             // Проверяем существование файла
             if (!File.Exists(filePath))
@@ -91,7 +97,7 @@ namespace PJT1.Services
                     // Проверяем, что лист существует и содержит данные
                     if (worksheet == null || worksheet.Dimension == null)
                     {
-                        throw new Exception("Excel файл пуст или не содержит данных");
+                        throw new InvalidDataException("Excel файл пуст или не содержит данных");
                     }
 
                     // Получаем количество строк с данными
@@ -118,9 +124,11 @@ namespace PJT1.Services
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not InvalidDataException)
             {
-                throw new Exception($"Ошибка при чтении Excel: {ex.Message}", ex);
+                // Оборачиваем только ошибки библиотеки EPPlus / ввода-вывода,
+                // сохраняя исходное исключение как InnerException
+                throw new InvalidDataException($"Ошибка при чтении Excel: {ex.Message}", ex);
             }
 
             return result;

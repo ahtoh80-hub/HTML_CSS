@@ -9,11 +9,19 @@ namespace IO_PJT.Utils
 
         public Logger(RichTextBox logControl)
         {
-            _logControl = logControl;
+            _logControl = logControl ?? throw new ArgumentNullException(nameof(logControl));
         }
 
         public void Log(string message)
         {
+            if (_logControl.IsDisposed) return;
+
+            if (_logControl.InvokeRequired)
+            {
+                _logControl.Invoke(new Action<string>(Log), message);
+                return;
+            }
+
             string timestamp = DateTime.Now.ToString("HH:mm:ss");
             _logControl.AppendText($"[{timestamp}] {message}\n");
             _logControl.ScrollToCaret();
