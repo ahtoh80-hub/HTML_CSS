@@ -464,7 +464,7 @@ namespace PJT1.Forms
                     catch (Exception ex)
                     {
                         MessageBox.Show(
-                            $"Ошибка при импорте данных:\n{ex.Message}",
+                            $"Ошибка при импорте данных:\n{DescribeError(ex)}",
                             "Ошибка",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Error
@@ -494,7 +494,22 @@ namespace PJT1.Forms
                         addForm.Comment
                     );
 
-                    _repository.Add(newData);
+                    try
+                    {
+                        _repository.Add(newData);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(
+                            $"Не удалось добавить запись:\n{DescribeError(ex)}",
+                            "Ошибка",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        statusLabel.Text = "Ошибка добавления записи";
+                        return;
+                    }
+
                     RefreshDataGridView();
                     statusLabel.Text = $"Добавлена запись: {newData.Tagname} - {newData.Loop}";
                 }
@@ -517,11 +532,34 @@ namespace PJT1.Forms
                 return;
             }
 
-            int id = Convert.ToInt32(dataGridView.SelectedRows[0].Cells["Id"].Value);
+            var idCell = dataGridView.SelectedRows[0].Cells["Id"].Value;
+            if (idCell == null || !int.TryParse(idCell.ToString(), out int id))
+            {
+                MessageBox.Show(
+                    "Не удалось определить идентификатор выбранной записи.",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                statusLabel.Text = "Ошибка удаления: некорректный ID";
+                return;
+            }
+
             var data = _repository.GetById(id);
+            if (data == null)
+            {
+                MessageBox.Show(
+                    $"Запись с ID {id} не найдена. Возможно, таблица устарела.",
+                    "Запись не найдена",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                RefreshDataGridView();
+                return;
+            }
 
             var result = MessageBox.Show(
-                $"Вы уверены, что хотите удалить запись:\n{data?.Tagname} - {data?.Loop}?",
+                $"Вы уверены, что хотите удалить запись:\n{data.Tagname} - {data.Loop}?",
                 "Подтверждение удаления",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
@@ -531,7 +569,7 @@ namespace PJT1.Forms
             {
                 _repository.Delete(id);
                 RefreshDataGridView();
-                statusLabel.Text = $"Удалена запись: {data?.Tagname} - {data?.Loop}";
+                statusLabel.Text = $"Удалена запись: {data.Tagname} - {data.Loop}";
             }
         }
 
@@ -605,13 +643,27 @@ namespace PJT1.Forms
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Ошибка при экспорте данных:\n{ex.Message}",
+                    $"Ошибка при экспорте данных:\n{DescribeError(ex)}",
                     "Ошибка",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
                 statusLabel.Text = "Ошибка экспорта данных";
             }
+        }
+
+        /// <summary>
+        /// СООБЩЕНИЕ ОБ ОШИБКЕ
+        /// Разворачивает цепочку InnerException, чтобы не терять первопричину
+        /// </summary>
+        private static string DescribeError(Exception ex)
+        {
+            var sb = new System.Text.StringBuilder(ex.Message);
+            for (var inner = ex.InnerException; inner != null; inner = inner.InnerException)
+            {
+                sb.Append("\n→ ").Append(inner.Message);
+            }
+            return sb.ToString();
         }
 
         /// <summary>

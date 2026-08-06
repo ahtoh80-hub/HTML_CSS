@@ -48,7 +48,9 @@ namespace PJT1.Services
         /// <param name="filePath">Путь к файлу для сохранения</param>
         /// <param name="format">Формат экспорта</param>
         /// <param name="includeHeader">Включать ли заголовок</param>
-        public static void ExportToTxt(
+        /// <returns>Путь к фактически записанному файлу</returns>
+        /// <exception cref="IOException">Не удалось записать файл</exception>
+        public static string ExportToTxt(
             IEnumerable<DataBD> dataList,
             string filePath,
             ExportFormat format = ExportFormat.Table,
@@ -66,36 +68,32 @@ namespace PJT1.Services
             if (!filePath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
                 filePath += ".txt";
 
+            // Генерируем содержимое в зависимости от формата
+            string content = format switch
+            {
+                ExportFormat.Table => ExportAsTable(dataList, includeHeader),
+                ExportFormat.Column => ExportAsColumns(dataList, includeHeader),
+                ExportFormat.List => ExportAsList(dataList, includeHeader),
+                ExportFormat.JsonLike => ExportAsJsonLike(dataList, includeHeader),
+                ExportFormat.Detailed => ExportAsDetailed(dataList, includeHeader),
+                _ => throw new ArgumentOutOfRangeException(
+                        nameof(format), format, "Неизвестный формат экспорта")
+            };
+
             try
             {
-                // Генерируем содержимое в зависимости от формата
-                string content = format switch
-                {
-                    ExportFormat.Table => ExportAsTable(dataList, includeHeader),
-                    ExportFormat.Column => ExportAsColumns(dataList, includeHeader),
-                    ExportFormat.List => ExportAsList(dataList, includeHeader),
-                    ExportFormat.JsonLike => ExportAsJsonLike(dataList, includeHeader),
-                    ExportFormat.Detailed => ExportAsDetailed(dataList, includeHeader),
-                    _ => ExportAsTable(dataList, includeHeader)
-                };
-
                 // Записываем в файл (UTF-8 для поддержки кириллицы)
                 File.WriteAllText(filePath, content, Encoding.UTF8);
-
-                // Показываем сообщение об успехе
-                MessageBox.Show(
-                    $"✅ Данные успешно сохранены в файл:\n{filePath}\n" +
-                    $"📊 Количество записей: {GetCount(dataList)}\n" +
-                    $"📦 Размер файла: {new FileInfo(filePath).Length / 1024} КБ",
-                    "Экспорт завершен",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is IOException
+                                       or UnauthorizedAccessException
+                                       or System.Security.SecurityException
+                                       or NotSupportedException)
             {
-                throw new Exception($"Ошибка при сохранении файла: {ex.Message}", ex);
+                throw new IOException($"Ошибка при сохранении файла '{filePath}': {ex.Message}", ex);
             }
+
+            return filePath;
         }
 
         /// <summary>
@@ -103,54 +101,54 @@ namespace PJT1.Services
         /// 
         /// Показывает диалог выбора формата и сохраняет файл
         /// </summary>
+        /// <remarks>
+        /// Ошибки экспорта не подавляются и передаются вызывающему коду,
+        /// чтобы он мог отличить отмену пользователем (false) от сбоя.
+        /// </remarks>
         public static bool ExportWithDialog(
             IEnumerable<DataBD> dataList, 
             string defaultFileName = "export")
         {
-            try
+            using (var saveDialog = new SaveFileDialog())
             {
-                using (var saveDialog = new SaveFileDialog())
+                // Настраиваем диалог сохранения
+                saveDialog.Title = "Сохранить данные в TXT файл";
+                saveDialog.Filter = "Текстовый файл (*.txt)|*.txt";
+                saveDialog.DefaultExt = "txt";
+                saveDialog.FileName = $"{defaultFileName}_{DateTime.Now:yyyyMMdd_HHmmss}";
+                saveDialog.InitialDirectory = Environment.GetFolderPath(
+                    Environment.SpecialFolder.MyDocuments
+                );
+
+                // Если пользователь выбрал файл
+                if (saveDialog.ShowDialog() != DialogResult.OK)
+                    return false;
+
+                // Показываем диалог выбора формата
+                using (var formatDialog = new Forms.FormatSelectionDialog())
                 {
-                    // Настраиваем диалог сохранения
-                    saveDialog.Title = "Сохранить данные в TXT файл";
-                    saveDialog.Filter = "Текстовый файл (*.txt)|*.txt";
-                    saveDialog.DefaultExt = "txt";
-                    saveDialog.FileName = $"{defaultFileName}_{DateTime.Now:yyyyMMdd_HHmmss}";
-                    saveDialog.InitialDirectory = Environment.GetFolderPath(
-                        Environment.SpecialFolder.MyDocuments
+                    if (formatDialog.ShowDialog() != DialogResult.OK)
+                        return false;
+
+                    string savedPath = ExportToTxt(
+                        dataList,
+                        saveDialog.FileName,
+                        formatDialog.SelectedFormat,
+                        formatDialog.IncludeHeader
                     );
 
-                    // Если пользователь выбрал файл
-                    if (saveDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        // Показываем диалог выбора формата
-                        using (var formatDialog = new Forms.FormatSelectionDialog())
-                        {
-                            if (formatDialog.ShowDialog() == DialogResult.OK)
-                            {
-                                ExportToTxt(
-                                    dataList,
-                                    saveDialog.FileName,
-                                    formatDialog.SelectedFormat,
-                                    formatDialog.IncludeHeader
-                                );
-                                return true;
-                            }
-                        }
-                    }
+                    MessageBox.Show(
+                        $"✅ Данные успешно сохранены в файл:\n{savedPath}\n" +
+                        $"📊 Количество записей: {GetCount(dataList)}\n" +
+                        $"📦 Размер файла: {new FileInfo(savedPath).Length / 1024} КБ",
+                        "Экспорт завершен",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+
+                    return true;
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Ошибка при экспорте данных:\n{ex.Message}",
-                    "Ошибка",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-            }
-
-            return false;
         }
 
         // ============================================================

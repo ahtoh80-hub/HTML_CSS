@@ -97,7 +97,7 @@ namespace PJT1.Repositories
         /// d => d.Id == id - это ЛЯМБДА-ВЫРАЖЕНИЕ
         /// Читается как: "для каждого d проверяем, что d.Id равен id"
         /// </summary>
-        public DataBD GetById(int id)
+        public DataBD? GetById(int id)
         {
             return _dataList.FirstOrDefault(d => d.Id == id);
         }
@@ -150,6 +150,14 @@ namespace PJT1.Repositories
             // Проходим по каждому объекту в коллекции
             foreach (var data in dataList)
             {
+                if (data == null)
+                {
+                    throw new ArgumentException(
+                        "Коллекция не может содержать null-элементы",
+                        nameof(dataList)
+                    );
+                }
+
                 // Присваиваем ID
                 data.Id = _nextId++;
                 // Добавляем в список
@@ -204,25 +212,17 @@ namespace PJT1.Repositories
         /// 2. Получаем список объектов DataBD
         /// 3. Добавляем их в репозиторий
         /// 
-        /// try-catch - обработка исключений
-        /// try - блок кода, который может вызвать ошибку
-        /// catch - блок для обработки ошибки
+        /// Исключения ExcelService (FileNotFoundException, ArgumentException,
+        /// InvalidDataException) намеренно не перехватываются: вызывающий код
+        /// должен видеть исходный тип ошибки, чтобы отреагировать на нее.
         /// </summary>
         public void ImportFromExcel(string filePath)
         {
-            try
-            {
-                // Читаем данные из Excel через сервис
-                var importedData = ExcelService.ReadFirstTwoFieldsFromExcel(filePath);
-                
-                // Добавляем данные в репозиторий
-                AddRange(importedData);
-            }
-            catch (Exception ex)
-            {
-                // Перебрасываем исключение с дополнительной информацией
-                throw new Exception($"Ошибка при импорте из Excel: {ex.Message}", ex);
-            }
+            // Читаем данные из Excel через сервис
+            var importedData = ExcelService.ReadFirstTwoFieldsFromExcel(filePath);
+
+            // Добавляем данные в репозиторий
+            AddRange(importedData);
         }
     }
 }
