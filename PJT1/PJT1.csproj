@@ -9,4 +9,8 @@
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.1.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\WinFormsKit\WinFormsKit.csproj" />
+  </ItemGroup>
 </Project>

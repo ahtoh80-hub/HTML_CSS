@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using WinFormsKit;
 
 namespace PJT1.Forms
 {
@@ -46,76 +47,26 @@ namespace PJT1.Forms
 
         private void InitializeControls()
         {
-            // Метка "Имя тега"
-            lblTagname = new Label();
-            lblTagname.Text = "Имя тега:*";
-            lblTagname.Location = new Point(20, 20);
-            lblTagname.Size = new Size(100, 25);
-            lblTagname.Font = new Font("Arial", 10, FontStyle.Bold);
-            lblTagname.ForeColor = Color.FromArgb(0, 123, 255);
+            // Обязательные поля подсвечиваются основным цветом
+            lblTagname = ControlFactory.CreateFieldLabel(
+                "Имя тега:*", new Point(20, 20), ControlFactory.Primary);
+            txtTagname = ControlFactory.CreateFieldTextBox(new Point(130, 20), new Size(320, 25));
 
-            // Поле "Имя тега"
-            txtTagname = new TextBox();
-            txtTagname.Location = new Point(130, 20);
-            txtTagname.Size = new Size(320, 25);
-            txtTagname.Font = new Font("Arial", 10);
-            txtTagname.BackColor = Color.FromArgb(248, 248, 248);
+            lblLoop = ControlFactory.CreateFieldLabel(
+                "Цикл:*", new Point(20, 60), ControlFactory.Primary);
+            txtLoop = ControlFactory.CreateFieldTextBox(new Point(130, 60), new Size(320, 25));
 
-            // Метка "Цикл"
-            lblLoop = new Label();
-            lblLoop.Text = "Цикл:*";
-            lblLoop.Location = new Point(20, 60);
-            lblLoop.Size = new Size(100, 25);
-            lblLoop.Font = new Font("Arial", 10, FontStyle.Bold);
-            lblLoop.ForeColor = Color.FromArgb(0, 123, 255);
+            lblComment = ControlFactory.CreateFieldLabel("Комментарий:", new Point(20, 100));
+            txtComment = ControlFactory.CreateFieldTextBox(
+                new Point(130, 100), new Size(320, 60), multiline: true);
 
-            // Поле "Цикл"
-            txtLoop = new TextBox();
-            txtLoop.Location = new Point(130, 60);
-            txtLoop.Size = new Size(320, 25);
-            txtLoop.Font = new Font("Arial", 10);
-            txtLoop.BackColor = Color.FromArgb(248, 248, 248);
+            btnOK = ControlFactory.CreateDialogButton(
+                "Добавить", new Point(270, 190), new Size(100, 35),
+                ControlFactory.Primary, DialogResult.OK, BtnOK_Click);
 
-            // Метка "Комментарий"
-            lblComment = new Label();
-            lblComment.Text = "Комментарий:";
-            lblComment.Location = new Point(20, 100);
-            lblComment.Size = new Size(100, 25);
-            lblComment.Font = new Font("Arial", 10, FontStyle.Bold);
-
-            // Поле "Комментарий"
-            txtComment = new TextBox();
-            txtComment.Location = new Point(130, 100);
-            txtComment.Size = new Size(320, 60);
-            txtComment.Font = new Font("Arial", 10);
-            txtComment.BackColor = Color.FromArgb(248, 248, 248);
-            txtComment.Multiline = true;
-            txtComment.ScrollBars = ScrollBars.Vertical;
-
-            // Кнопка "OK"
-            btnOK = new Button();
-            btnOK.Text = "Добавить";
-            btnOK.Location = new Point(270, 190);
-            btnOK.Size = new Size(100, 35);
-            btnOK.BackColor = Color.FromArgb(0, 123, 255);
-            btnOK.ForeColor = Color.White;
-            btnOK.FlatStyle = FlatStyle.Flat;
-            btnOK.Font = new Font("Arial", 10, FontStyle.Bold);
-            btnOK.Cursor = Cursors.Hand;
-            btnOK.DialogResult = DialogResult.OK;
-            btnOK.Click += BtnOK_Click;
-
-            // Кнопка "Отмена"
-            btnCancel = new Button();
-            btnCancel.Text = "Отмена";
-            btnCancel.Location = new Point(380, 190);
-            btnCancel.Size = new Size(80, 35);
-            btnCancel.BackColor = Color.FromArgb(108, 117, 125);
-            btnCancel.ForeColor = Color.White;
-            btnCancel.FlatStyle = FlatStyle.Flat;
-            btnCancel.Font = new Font("Arial", 10, FontStyle.Bold);
-            btnCancel.Cursor = Cursors.Hand;
-            btnCancel.DialogResult = DialogResult.Cancel;
+            btnCancel = ControlFactory.CreateDialogButton(
+                "Отмена", new Point(380, 190), new Size(80, 35),
+                ControlFactory.Secondary, DialogResult.Cancel);
 
             // Валидация
             txtTagname.TextChanged += (s, e) => ValidateFields();
@@ -128,29 +79,24 @@ namespace PJT1.Forms
                            !string.IsNullOrWhiteSpace(txtLoop.Text);
         }
 
+        /// <summary>
+        /// Проверяет заполнение обязательного поля и сообщает об ошибке
+        /// </summary>
+        private bool IsRequiredFieldFilled(TextBox field, string fieldTitle)
+        {
+            if (!string.IsNullOrWhiteSpace(field.Text))
+                return true;
+
+            UserMessages.Warning($"Поле '{fieldTitle}' обязательно для заполнения.", "Ошибка");
+            this.DialogResult = DialogResult.None;
+            return false;
+        }
+
         private void BtnOK_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtTagname.Text))
+            if (!IsRequiredFieldFilled(txtTagname, "Имя тега") ||
+                !IsRequiredFieldFilled(txtLoop, "Цикл"))
             {
-                MessageBox.Show(
-                    "Поле 'Имя тега' обязательно для заполнения.",
-                    "Ошибка",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-                this.DialogResult = DialogResult.None;
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtLoop.Text))
-            {
-                MessageBox.Show(
-                    "Поле 'Цикл' обязательно для заполнения.",
-                    "Ошибка",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-                this.DialogResult = DialogResult.None;
                 return;
             }
 

@@ -5,7 +5,8 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using PJT1.Services;
-using PJT1.Models; 
+using PJT1.Models;
+using WinFormsKit;
 
 namespace PJT1.Forms
 {
@@ -105,7 +106,7 @@ namespace PJT1.Forms
             panelPreview.Location = new Point(15, 225);
             panelPreview.Size = new Size(520, 120);
             panelPreview.BorderStyle = BorderStyle.FixedSingle;
-            panelPreview.BackColor = Color.FromArgb(248, 248, 248);
+            panelPreview.BackColor = ControlFactory.FieldBackground;
 
             lblPreview = new Label();
             lblPreview.Location = new Point(5, 5);
@@ -128,27 +129,13 @@ namespace PJT1.Forms
             };
 
             // Кнопки
-            btnOK = new Button();
-            btnOK.Text = "Сохранить";
-            btnOK.Location = new Point(360, 395);
-            btnOK.Size = new Size(100, 35);
-            btnOK.BackColor = Color.FromArgb(0, 123, 255);
-            btnOK.ForeColor = Color.White;
-            btnOK.FlatStyle = FlatStyle.Flat;
-            btnOK.Font = new Font("Arial", 10, FontStyle.Bold);
-            btnOK.Cursor = Cursors.Hand;
-            btnOK.DialogResult = DialogResult.OK;
+            btnOK = ControlFactory.CreateDialogButton(
+                "Сохранить", new Point(360, 395), new Size(100, 35),
+                ControlFactory.Primary, DialogResult.OK);
 
-            btnCancel = new Button();
-            btnCancel.Text = "Отмена";
-            btnCancel.Location = new Point(470, 395);
-            btnCancel.Size = new Size(80, 35);
-            btnCancel.BackColor = Color.FromArgb(108, 117, 125);
-            btnCancel.ForeColor = Color.White;
-            btnCancel.FlatStyle = FlatStyle.Flat;
-            btnCancel.Font = new Font("Arial", 10, FontStyle.Bold);
-            btnCancel.Cursor = Cursors.Hand;
-            btnCancel.DialogResult = DialogResult.Cancel;
+            btnCancel = ControlFactory.CreateDialogButton(
+                "Отмена", new Point(470, 395), new Size(80, 35),
+                ControlFactory.Secondary, DialogResult.Cancel);
 
             // Добавляем все элементы
             groupFormat.Controls.Add(rbTable);
