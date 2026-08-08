@@ -1,0 +1,159 @@
+<Window x:Class="IOPointManager.Views.AccessDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="🗄️ Управление Access" 
+        Height="500" Width="700"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5">
+    
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="DialogButton">
+            <Setter Property="Background" Value="#007ACC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#005A9E"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#CCCCCC"/>
+                    <Setter Property="Foreground" Value="#888888"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="Button" x:Key="SuccessButton" BasedOn="{StaticResource DialogButton}">
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#388E3C"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="Button" x:Key="DangerButton" BasedOn="{StaticResource DialogButton}">
+            <Setter Property="Background" Value="#D32F2F"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#B71C1C"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Подключение -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#DDDDDD" BorderThickness="1" Padding="10" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="🔌 Подключение:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,5,0"/>
+                <TextBlock Grid.Column="1" Text="{Binding ConnectionStatus}" VerticalAlignment="Center" 
+                           Foreground="{Binding IsConnected, Converter={StaticResource BoolToColorConverter}}"
+                           FontWeight="Bold"/>
+                
+                <Button Grid.Column="2" Content="📂 Выбрать БД" Command="{Binding SelectDatabaseCommand}" 
+                        Style="{StaticResource DialogButton}" Padding="10,5"/>
+                <Button Grid.Column="3" Content="🔗 Подключить" Command="{Binding ConnectCommand}" 
+                        Style="{StaticResource SuccessButton}" Padding="10,5"
+                        IsEnabled="{Binding CanConnect}"/>
+                <Button Grid.Column="4" Content="🔌 Отключить" Command="{Binding DisconnectCommand}" 
+                        Style="{StaticResource DangerButton}" Padding="10,5"
+                        IsEnabled="{Binding IsConnected}"/>
+            </Grid>
+        </Border>
+
+        <!-- Управление таблицами -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#DDDDDD" BorderThickness="1" Padding="10" Margin="0,0,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Таблица:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,5,5"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TableName}" VerticalContentAlignment="Center" Margin="0,0,10,5"/>
+                
+                <Button Grid.Row="0" Grid.Column="2" Content="📋 Создать" Command="{Binding CreateTableCommand}" 
+                        Style="{StaticResource DialogButton}" Padding="10,5" Margin="0,0,5,5"/>
+                <Button Grid.Row="0" Grid.Column="3" Content="🗑️ Удалить" Command="{Binding DropTableCommand}" 
+                        Style="{StaticResource DangerButton}" Padding="10,5" Margin="0,0,5,5"/>
+                <Button Grid.Row="0" Grid.Column="4" Content="💾 Резерв" Command="{Binding BackupTableCommand}" 
+                        Style="{StaticResource DialogButton}" Padding="10,5" Margin="0,0,5,5"/>
+                <Button Grid.Row="0" Grid.Column="5" Content="🧹 Очистить" Command="{Binding ClearTableCommand}" 
+                        Style="{StaticResource DangerButton}" Padding="10,5" Margin="0,0,0,5"/>
+
+                <Button Grid.Row="1" Grid.Column="1" Content="📥 Импорт из Access" Command="{Binding ImportCommand}" 
+                        Style="{StaticResource DialogButton}" Padding="15,5" Margin="0,5,10,0"/>
+                <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Content="💾 Экспорт в Access" Command="{Binding ExportCommand}" 
+                        Style="{StaticResource SuccessButton}" Padding="15,5" Margin="0,5,5,0"/>
+                <Button Grid.Row="1" Grid.Column="4" Content="⟳ Обновить" Command="{Binding RefreshTablesCommand}" 
+                        Style="{StaticResource DialogButton}" Padding="10,5" Margin="0,5,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- Список таблиц -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#DDDDDD" BorderThickness="1" Padding="5">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="📊 Таблицы в базе" FontWeight="Bold" FontSize="14" 
+                           Padding="5" Background="#2C3E50" Foreground="White"/>
+                <ListBox x:Name="TablesList" 
+                         ItemsSource="{Binding Tables}"
+                         SelectedItem="{Binding SelectedTable}"
+                         Background="#F8F9FA"
+                         BorderThickness="0"
+                         FontSize="13">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="10,6"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#007ACC"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#E3F2FD"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <!-- Кнопки -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="✅ Применить" Command="{Binding ImportCommand}" 
+                    Style="{StaticResource SuccessButton}" Padding="20,8" 
+                    IsEnabled="{Binding IsConnected}"/>
+            <Button Content="❌ Закрыть" Command="{Binding CloseCommand}" 
+                    Style="{StaticResource DialogButton}" Padding="20,8" Background="#999999"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,58 @@
+<Window x:Class="IOPointManager.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="IOPoint Manager" 
+        Height="600" Width="900"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <TextBlock Grid.Row="0" Text="IOPoint Manager" FontSize="24" FontWeight="Bold" 
+                   HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+        <!-- Панель инструментов -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+            <Button Content="📂 Excel" Command="{Binding OpenExcelCommand}" 
+                    Width="100" Height="30" Margin="5" Background="#007ACC" Foreground="White"/>
+            <Button Content="🗄️ Access" Command="{Binding AccessCommand}" 
+                    Width="100" Height="30" Margin="5" Background="#007ACC" Foreground="White"/>
+            <Button Content="➕ Добавить" Command="{Binding AddPointCommand}" 
+                    Width="100" Height="30" Margin="5" Background="#4CAF50" Foreground="White"/>
+            <Button Content="✏️ Редактировать" Command="{Binding EditPointCommand}" 
+                    Width="100" Height="30" Margin="5" Background="#FF9800" Foreground="White"/>
+            <Button Content="🗑️ Удалить" Command="{Binding DeletePointCommand}" 
+                    Width="100" Height="30" Margin="5" Background="#D32F2F" Foreground="White"/>
+            <Button Content="✅ Валидация" Command="{Binding ValidateAllCommand}" 
+                    Width="100" Height="30" Margin="5" Background="#2196F3" Foreground="White"/>
+        </StackPanel>
+
+        <!-- Информация -->
+        <Border Grid.Row="2" Background="#F0F0F0" BorderBrush="#CCCCCC" BorderThickness="1" Padding="10">
+            <StackPanel>
+                <TextBlock Text="Количество точек:" FontWeight="Bold"/>
+                <TextBlock Text="{Binding TotalCount}" FontSize="20" Foreground="#007ACC"/>
+                
+                <TextBlock Text="Отфильтровано:" FontWeight="Bold" Margin="0,10,0,0"/>
+                <TextBlock Text="{Binding FilteredCount}" FontSize="20" Foreground="#4CAF50"/>
+                
+                <TextBlock Text="Выбрано:" FontWeight="Bold" Margin="0,10,0,0"/>
+                <TextBlock Text="{Binding SelectedPoint.Tag}" FontSize="16" Foreground="#FF9800"/>
+                
+                <Button Content="Загрузить данные" Command="{Binding LoadDataCommand}" 
+                        Width="150" Height="30" Margin="0,20,0,0" Background="#2196F3" Foreground="White"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Статус -->
+        <Border Grid.Row="3" Background="#2C3E50" Padding="10" Margin="0,10,0,0">
+            <TextBlock Text="Приложение запущено" Foreground="White"/>
+        </Border>
+    </Grid>
+</Window>

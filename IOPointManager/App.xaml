@@ -1,0 +1,101 @@
+﻿<Application x:Class="IOPointManager.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:IOPointManager.Converters"
+             StartupUri="Views/MainWindow.xaml">
+    
+    <Application.Resources>
+        <!-- Конвертеры -->
+        <converters:BoolToColorConverter x:Key="BoolToColorConverter" 
+                                         TrueColor="#4CAF50" 
+                                         FalseColor="#D32F2F"/>
+        <converters:LogColorConverter x:Key="LogColorConverter"/>
+        <converters:QualityToColorConverter x:Key="QualityToColorConverter"/>
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        
+        <!-- Стили -->
+        <Style TargetType="Window">
+            <Setter Property="FontFamily" Value="Segoe UI, Arial, sans-serif"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="#F5F5F5"/>
+        </Style>
+        
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="5,3"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="#007ACC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#005A9E"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#CCCCCC"/>
+                    <Setter Property="Foreground" Value="#888888"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style TargetType="DataGrid">
+            <Setter Property="BorderBrush" Value="#DDDDDD"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#E0E0E0"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#E0E0E0"/>
+            <Setter Property="AlternatingRowBackground" Value="#F8F9FA"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#2C3E50"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+        
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="4,2"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsImportValid}" Value="False">
+                    <Setter Property="Background" Value="#FFE0E0"/>
+                    <Setter Property="ToolTip" Value="{Binding ImportError}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsValid}" Value="False">
+                    <Setter Property="Background" Value="#FFD0D0"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DataQualityScore}" Value="&lt; 70">
+                    <Setter Property="Background" Value="#FFF0D0"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DataQualityScore}" Value="&lt; 50">
+                    <Setter Property="Background" Value="#FFE0E0"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="Fault">
+                    <Setter Property="Background" Value="#FFC0C0"/>
+                    <Setter Property="Foreground" Value="#D32F2F"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="Maintenance">
+                    <Setter Property="Background" Value="#FFF8E1"/>
+                    <Setter Property="Foreground" Value="#F57C00"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="Active">
+                    <Setter Property="Background" Value="#E8F5E9"/>
+                    <Setter Property="Foreground" Value="#2E7D32"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,13 @@
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\IOPointManager.csproj.AssemblyReference.cache
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\Views\AccessDialog.baml
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\Views\MainWindow copy.baml
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\Views\MainWindow.baml
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\Views\MappingDialog.baml
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\Views\AccessDialog.g.cs
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\Views\MainWindow copy.g.cs
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\Views\MainWindow.g.cs
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\Views\MappingDialog.g.cs
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\App.g.cs
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\IOPointManager_MarkupCompile.cache
+C:\Users\RAN-Notebook\Desktop\PJT\IOPointManager\obj\Debug\net8.0-windows\IOPointManager_MarkupCompile.lref
