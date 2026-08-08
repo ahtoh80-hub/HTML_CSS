@@ -1,0 +1,5 @@
+C:\_Work\VSCode\TemplateGenerator\TemplateGenerator\obj\Debug\net6.0-windows\TemplateGenerator.csproj.AssemblyReference.cache
+C:\_Work\VSCode\TemplateGenerator\TemplateGenerator\obj\Debug\net6.0-windows\TemplateGenerator.GeneratedMSBuildEditorConfig.editorconfig
+C:\_Work\VSCode\TemplateGenerator\TemplateGenerator\obj\Debug\net6.0-windows\TemplateGenerator.AssemblyInfoInputs.cache
+C:\_Work\VSCode\TemplateGenerator\TemplateGenerator\obj\Debug\net6.0-windows\TemplateGenerator.AssemblyInfo.cs
+C:\_Work\VSCode\TemplateGenerator\TemplateGenerator\obj\Debug\net6.0-windows\TemplateGenerator.csproj.CoreCompileInputs.cache
